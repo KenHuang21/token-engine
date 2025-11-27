@@ -2,7 +2,12 @@ import json
 import os
 from typing import List, Dict, Any
 
-DB_FILE = "backend/db.json"
+# Use absolute path for Vercel compatibility
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Go up one level from 'backend' to root, then into 'backend' (redundant but safe if structure changes)
+# Actually, this file is in 'backend/', so DB_FILE should be in the same dir or we resolve from root.
+# Let's assume db.json is in 'backend/' alongside database.py
+DB_FILE = os.path.join(BASE_DIR, "db.json")
 
 def load_db() -> Dict[str, Any]:
     if not os.path.exists(DB_FILE):
@@ -14,8 +19,12 @@ def load_db() -> Dict[str, Any]:
             return {"contracts": []}
 
 def save_db(data: Dict[str, Any]):
-    with open(DB_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
+    try:
+        with open(DB_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+    except OSError:
+        # Vercel file system is read-only
+        print("Warning: Could not write to database (Read-only filesystem)")
 
 def add_contract(contract: Dict[str, Any]):
     db = load_db()
