@@ -1,0 +1,81 @@
+{
+  "contracts": [
+    {
+      "type": "MANAGED",
+      "chain_id": "BSC_BNB",
+      "name": "Test Token for ERC 1400 (27 Nov 2025)",
+      "symbol": "TT1401",
+      "partitions": [
+        "Class A",
+        "Class B"
+      ],
+      "wallet_id": "e4288c49-bbf3-47f6-97e5-1bcf0060e53e",
+      "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
+      "tx_id": "9fa3df2e-88ee-42cd-acaf-d5d72d519093",
+      "status": "Deployed",
+      "tx_hash": "0xa3e65f5a22dbeb98f65ba441f81386fd739a3bef6bb2e01fc1d7ab4f48daea86",
+      "contract_address": "0x6D9F44f10784e3f815641494e6a01aC17b020196"
+    },
+    {
+      "type": "MANAGED",
+      "chain_id": "BSC_BNB",
+      "name": "Test Token for ERC 1400 (27 Nov 2025) - 2",
+      "symbol": "TT1402",
+      "partitions": [
+        "Class A",
+        "Class C"
+      ],
+      "wallet_id": "e4288c49-bbf3-47f6-97e5-1bcf0060e53e",
+      "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
+      "tx_id": "5b63306c-7ae2-41ce-89a2-79101a23eb96",
+      "status": "Deployed",
+      "tx_hash": "0x57f9925b305d5d22dbd85f14ad61b570425950af81a9e2488c9ceeb21f196209",
+      "contract_address": "0x8183F65a9f2EC6B9bF4c07Fc9B41Ef0A9E316d2f"
+    },
+    {
+      "type": "MANAGED",
+      "chain_id": "BSC_BNB",
+      "name": "Test Token for ERC 1400 (27 Nov 2025) - 2",
+      "symbol": "TT1403",
+      "partitions": [
+        "Tranche 1",
+        "Tranche 2"
+      ],
+      "wallet_id": "e4288c49-bbf3-47f6-97e5-1bcf0060e53e",
+      "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
+      "tx_id": "2bdeb70a-612e-4003-9992-38ac61da65c1",
+      "status": "Deployed",
+      "tx_hash": "0xd47f04559cac77070831e3e12c727201185f7becce53c3573bfb5a974a7d3c26",
+      "contract_address": "0x1Fd3C758B4F93CC4d098431c6B8d2fC7d5220352"
+    }
+  ],
+  "mints": [
+    {
+      "chain_id": "BSC_BNB",
+      "contract_address": "0x6D9F44f10784e3f815641494e6a01aC17b020196",
+      "partition": "Class A",
+      "to_address": "0xd4402d1e46f1b13b3d1e683b2604c93dd91075b9",
+      "amount": 1000,
+      "tx_id": "mock_mint_1",
+      "timestamp": 1732720000
+    },
+    {
+      "chain_id": "BSC_BNB",
+      "contract_address": "0x8183F65a9f2EC6B9bF4c07Fc9B41Ef0A9E316d2f",
+      "partition": "Class A",
+      "to_address": "0xd4402d1e46f1b13b3d1e683b2604c93dd91075b9",
+      "amount": 888,
+      "tx_id": "mock_mint_2",
+      "timestamp": 1732720000
+    },
+    {
+      "chain_id": "BSC_BNB",
+      "contract_address": "0x6D9F44f10784e3f815641494e6a01aC17b020196",
+      "partition": "Class B",
+      "to_address": "0xd4402d1e46f1b13b3d1e683b2604c93dd91075b9",
+      "amount": 500,
+      "tx_id": "mock_mint_3",
+      "timestamp": 1732720000
+    }
+  ]
+}

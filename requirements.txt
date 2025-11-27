@@ -1,0 +1,11 @@
+cobo-waas2>=1.0.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+pynacl>=1.5.0
+py-solc-x
+tabulate
+web3
+
+fastapi
+uvicorn
