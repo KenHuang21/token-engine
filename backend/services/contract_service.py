@@ -13,7 +13,9 @@ from cobo_waas2.models import (
     EvmContractCallDestination
 )
 
-ARTIFACT_PATH = 'backend/artifacts/SimpleERC1400.json'
+# Use absolute path for Vercel
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ARTIFACT_PATH = os.path.join(BASE_DIR, 'artifacts/SimpleERC1400.json')
 GAS_LIMIT = 3000000
 
 def get_artifact():
