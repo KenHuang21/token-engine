@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: token-engine-api
+    env: python
+    region: ohio
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      # These placeholders force you to input the real keys in the dashboard
+      - key: COBO_API_PUBLIC_KEY
+        sync: false
+      - key: COBO_API_PRIVATE_KEY
+        sync: false
+```
+
+*Crucial Check:* Ensure your `requirements.txt` is in the **root** directory. If it is inside `backend/`, change the build command to `pip install -r backend/requirements.txt`.
+
+### **Step 2: Push to GitHub**
+
+Save the file and push it. This syncs your infrastructure code.
+
+**In your Terminal:**
+```bash
+git add render.yaml
+git commit -m "Add Render deployment blueprint"
+git push origin main
