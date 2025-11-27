@@ -17,4 +17,4 @@ def read_root():
     return {"message": "Tokenization Platform API is running"}
 
 from backend.api import routes
-app.include_router(routes.router)
+app.include_router(routes.router, prefix="/api")

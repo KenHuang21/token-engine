@@ -4,7 +4,7 @@ import { sha256 } from 'js-sha256';
 import { ExternalLink, ArrowLeft } from 'lucide-react';
 import { getBlockExplorerUrl } from '../utils';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = '/api';
 
 export default function TokenManager({ token, onBack }) {
     const [activeTab, setActiveTab] = useState('holders'); // Default to holders as per screenshot

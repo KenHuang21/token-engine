@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import axios from 'axios';
 import { getBlockExplorerUrl } from '../utils';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = '/api';
 
 export default function Dashboard({ onSelectToken, onDeploy }) {
     const { data: contracts, isLoading, error } = useQuery({

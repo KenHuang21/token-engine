@@ -5,7 +5,7 @@ import axios from 'axios';
 import { ChevronRight, Check, Plus, Trash2, Loader2, Layers, FileText, ShieldCheck } from 'lucide-react';
 import clsx from 'clsx';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = '/api';
 
 export default function DeployWizard({ onComplete }) {
     const [step, setStep] = useState(1);
