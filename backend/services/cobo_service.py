@@ -16,16 +16,26 @@ class CoboClient:
 
     def _initialize_client(self):
         """Initialize the Cobo API client with configuration."""
-        # Use explicit signer to ensure correct key handling
-        signer = LocalEd25519Signer(settings.cobo_api_private_key)
-        
-        configuration = cobo_waas2.Configuration(
-            host=settings.cobo_api_url,
-            signer=signer
-        )
-        self.api_client = cobo_waas2.ApiClient(configuration)
-        self.wallets_api = wallets_api.WalletsApi(self.api_client)
-        self.transactions_api = transactions_api.TransactionsApi(self.api_client)
+        try:
+            if not settings.cobo_api_private_key or not settings.cobo_api_url:
+                print("Warning: Cobo API credentials not found.")
+                return
+
+            # Use explicit signer to ensure correct key handling
+            signer = LocalEd25519Signer(settings.cobo_api_private_key)
+            
+            configuration = cobo_waas2.Configuration(
+                host=settings.cobo_api_url,
+                signer=signer
+            )
+            self.api_client = cobo_waas2.ApiClient(configuration)
+            self.wallets_api = wallets_api.WalletsApi(self.api_client)
+            self.transactions_api = transactions_api.TransactionsApi(self.api_client)
+        except Exception as e:
+            print(f"Failed to initialize Cobo client: {e}")
+            self.api_client = None
+            self.wallets_api = None
+            self.transactions_api = None
 
     def get_wallets(self, wallet_type: WalletType = None, wallet_subtype: WalletSubtype = None, limit: int = 10):
         """
