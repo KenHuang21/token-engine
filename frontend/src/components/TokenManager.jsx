@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useWalletClient, usePublicClient } from 'wagmi';
+import { parseEther, pad, toHex } from 'viem';
 import axios from 'axios';
 import { sha256 } from 'js-sha256';
 import { ExternalLink, ArrowLeft } from 'lucide-react';
@@ -10,6 +12,8 @@ export default function TokenManager({ token, onBack }) {
     const [activeTab, setActiveTab] = useState('holders'); // Default to holders as per screenshot
     const [loading, setLoading] = useState(false);
     const [holders, setHolders] = useState([]);
+    const { data: walletClient } = useWalletClient();
+    const publicClient = usePublicClient();
 
     // Mint Form
     const [mintData, setMintData] = useState({
@@ -47,16 +51,56 @@ export default function TokenManager({ token, onBack }) {
         e.preventDefault();
         setLoading(true);
         try {
-            await axios.post(`${API_URL}/tokens/mint`, {
-                chain_id: token.chain_id,
-                contract_address: token.contract_address || token.owner,
-                partition: mintData.partition,
-                to_address: mintData.to,
-                amount: Number(mintData.amount)
-            });
-            alert("Minting Submitted!");
+            if (token.type === 'SELF_CUSTODY') {
+                if (!walletClient) throw new Error("Wallet not connected");
+
+                // Get ABI
+                const artifacts = await axios.get(`${API_URL}/artifacts`);
+                const { abi } = artifacts.data;
+
+                // Prepare args
+                const partitionBytes = pad(toHex(mintData.partition), { size: 32, dir: 'right' });
+                const amountWei = parseEther(mintData.amount.toString());
+
+                // Send TX
+                const hash = await walletClient.writeContract({
+                    address: token.contract_address,
+                    abi: abi,
+                    functionName: 'issueByPartition',
+                    args: [partitionBytes, mintData.to, amountWei, '0x']
+                });
+
+                alert(`Mint TX Sent! Waiting for confirmation... Tx: ${hash}`);
+
+                // Wait for receipt
+                await publicClient.waitForTransactionReceipt({ hash });
+
+                // Register mint with backend for history/holders
+                await axios.post(`${API_URL}/tokens/mint/register`, {
+                    chain_id: token.chain_id,
+                    contract_address: token.contract_address,
+                    partition: mintData.partition,
+                    to_address: mintData.to,
+                    amount: Number(mintData.amount),
+                    tx_hash: hash
+                });
+
+                alert("Minting Confirmed & Registered!");
+            } else {
+                // MANAGED
+                await axios.post(`${API_URL}/tokens/mint`, {
+                    chain_id: token.chain_id,
+                    contract_address: token.contract_address || token.owner,
+                    partition: mintData.partition,
+                    to_address: mintData.to,
+                    amount: Number(mintData.amount)
+                });
+                alert("Minting Submitted!");
+            }
             setMintData({ ...mintData, amount: 0, to: '' });
+            if (activeTab === 'holders') fetchHolders();
         } catch (err) {
+            console.error(err);
             alert(`Error: ${err.message}`);
         } finally {
             setLoading(false);

@@ -1,7 +1,17 @@
+
 import cobo_waas2
+import uuid
 from cobo_waas2.api import wallets_api, transactions_api
 from cobo_waas2.models.wallet_type import WalletType
 from cobo_waas2.models.wallet_subtype import WalletSubtype
+from cobo_waas2.models.contract_call_params import ContractCallParams
+from cobo_waas2.models.contract_call_source import ContractCallSource
+from cobo_waas2.models.contract_call_source_type import ContractCallSourceType
+from cobo_waas2.models.custodial_web3_contract_call_source import CustodialWeb3ContractCallSource
+from cobo_waas2.models.contract_call_destination import ContractCallDestination
+from cobo_waas2.models.contract_call_destination_type import ContractCallDestinationType
+from cobo_waas2.models.evm_contract_call_destination import EvmContractCallDestination
+from cobo_waas2.models.transaction_type import TransactionType
 from cobo_waas2.crypto.local_ed25519_signer import LocalEd25519Signer
 from backend.config.settings import settings
 
@@ -142,6 +152,20 @@ class CoboClient:
             print(f"Failed to get transaction: {e}")
             return None
 
+    def list_transactions(self, wallet_id: str = None, limit: int = 10):
+        """
+        List transactions.
+        """
+        try:
+            kwargs = {'limit': limit}
+            if wallet_id:
+                kwargs['wallet_ids'] = wallet_id
+                
+            return self.transactions_api.list_transactions(**kwargs).data
+        except Exception as e:
+            print(f"Failed to list transactions: {e}")
+            return []
+
     def get_wallet_address(self, wallet_id: str, chain_id: str = None):
         """
         Get the address of a wallet.
@@ -191,10 +215,90 @@ class CoboClient:
             # Check balance (Mock check for now to avoid slow API calls, or implement real check)
             # For MVP speed, we'll just return the first one that has an address on this chain.
             # In production, we would call list_token_balances.
-            print(f"✅ Found wallet: {w['name']} ({address})")
-            return {"wallet_id": wallet_id, "address": address}
+            print(f"✅ Found wallet: {w['name']} ({address}) Type: {w['type']} Subtype: {w['subtype']}")
+            return {"wallet_id": wallet_id, "address": address, "subtype": w['subtype']}
             
-        raise Exception(f"No wallet found for chain {chain_id}")
+    def create_contract_call(self, chain_id: str, wallet_id: str, to_address: str, calldata: str, amount: int = 0):
+        """
+        Create a contract call transaction.
+        """
+        try:
+            if not self.transactions_api:
+                raise Exception("Cobo API not initialized")
+
+            source = ContractCallSource(
+                actual_instance=CustodialWeb3ContractCallSource(
+                    source_type=ContractCallSourceType.WEB3,
+                    wallet_id=wallet_id,
+                    address=self.get_wallet_address(wallet_id, chain_id)
+                )
+            )
+            
+            destination = ContractCallDestination(
+                actual_instance=EvmContractCallDestination(
+                    destination_type=ContractCallDestinationType.EVM_CONTRACT,
+                    address=to_address,
+                    calldata=calldata,
+                    amount=str(amount)
+                )
+            )
+            
+            params = ContractCallParams(
+                request_id=str(uuid.uuid4()), # Ensure unique ID for every request
+                chain_id=chain_id,
+                source=source,
+                destination=destination,
+                description="Mint Token via TokenEngine"
+            )
+            
+            response = self.transactions_api.create_contract_call_transaction(params)
+            return response.transaction_id
+            
+        except Exception as e:
+            print(f"Failed to create contract call: {e}")
+            raise e
+
+    def deploy_contract(self, chain_id: str, wallet_id: str, bytecode: str, amount: int = 0):
+        """
+        Deploy a contract using Cobo WaaS.
+        """
+        try:
+            if not self.transactions_api:
+                raise Exception("Cobo API not initialized")
+
+            source = ContractCallSource(
+                actual_instance=CustodialWeb3ContractCallSource(
+                    source_type=ContractCallSourceType.WEB3,
+                    wallet_id=wallet_id,
+                    address=self.get_wallet_address(wallet_id, chain_id)
+                )
+            )
+            
+            # For deployment, destination address is usually empty or null.
+            # We use EvmContractCallDestination with empty address.
+            destination = ContractCallDestination(
+                actual_instance=EvmContractCallDestination(
+                    destination_type=ContractCallDestinationType.EVM_CONTRACT,
+                    address="", # Empty address for deployment
+                    calldata=bytecode,
+                    amount=str(amount)
+                )
+            )
+            
+            params = ContractCallParams(
+                request_id=str(uuid.uuid4()),
+                chain_id=chain_id,
+                source=source,
+                destination=destination,
+                description="Deploy Token via TokenEngine"
+            )
+            
+            response = self.transactions_api.create_contract_call_transaction(params)
+            return response.transaction_id
+            
+        except Exception as e:
+            print(f"Failed to deploy contract: {e}")
+            raise e
 
 # Global instance
 cobo_client = CoboClient()

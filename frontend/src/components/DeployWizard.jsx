@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useWalletClient, useAccount } from 'wagmi';
+import { useWalletClient, useAccount, useSwitchChain, usePublicClient } from 'wagmi';
 import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { ChevronRight, Check, Plus, Trash2, Loader2, Layers, FileText, ShieldCheck } from 'lucide-react';
@@ -20,7 +20,9 @@ export default function DeployWizard({ onComplete }) {
     });
 
     const { data: walletClient } = useWalletClient();
-    const { address } = useAccount();
+    const { address, chain } = useAccount();
+    const { switchChainAsync } = useSwitchChain();
+    const publicClient = usePublicClient();
     const queryClient = useQueryClient();
 
     const addPartition = () => {
@@ -57,6 +59,18 @@ export default function DeployWizard({ onComplete }) {
             } else {
                 if (!walletClient) throw new Error("Wallet not connected");
 
+                if (!walletClient) throw new Error("Wallet not connected");
+
+                // Enforce BSC Network
+                const targetChainId = 56; // BSC Mainnet
+                if (chain?.id !== targetChainId) {
+                    try {
+                        await switchChainAsync({ chainId: targetChainId });
+                    } catch (switchError) {
+                        throw new Error("Please switch your wallet to BSC Mainnet to deploy.");
+                    }
+                }
+
                 const artifacts = await axios.get(`${API_URL}/artifacts`);
                 const { abi, bytecode } = artifacts.data;
 
@@ -76,8 +90,27 @@ export default function DeployWizard({ onComplete }) {
                     args: [formData.name, formData.symbol, partitionsBytes, address],
                 });
 
-                // Note: Sync logic omitted for brevity as per previous context
-                alert(`Deployed via Wallet! Tx: ${hash}`);
+                alert(`Transaction sent! Waiting for confirmation... Tx: ${hash}`);
+
+                // Wait for receipt to get contract address
+                const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+                if (receipt.contractAddress) {
+                    // Register with backend
+                    await axios.post(`${API_URL}/tokens/register`, {
+                        chain_id: 'BSC_BNB', // Or map from chain.id
+                        name: formData.name,
+                        symbol: formData.symbol,
+                        contract_address: receipt.contractAddress,
+                        tx_hash: hash,
+                        partitions: validPartitions,
+                        owner: address,
+                        type: 'SELF_CUSTODY'
+                    });
+                    alert(`Deployed & Registered! Address: ${receipt.contractAddress}`);
+                } else {
+                    alert("Deployed but failed to get contract address from receipt.");
+                }
             }
 
             queryClient.invalidateQueries(['tokens']);
