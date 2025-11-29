@@ -1,51 +1,6 @@
 {
   "contracts": [
     {
-      "name": "Cobo Test Token 2",
-      "symbol": "CTT2",
-      "chain_id": "BSC_BNB",
-      "contract_address": "Pending",
-      "type": "MANAGED",
-      "status": "Pending",
-      "partitions": [
-        "Class A"
-      ],
-      "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
-      "tx_hash": "",
-      "cobo_id": "758088a9-e23a-4d0b-9ec2-f6c69933baf0"
-    },
-    {
-      "name": "Cobo ERC1400 Test 101",
-      "symbol": "CET101",
-      "chain_id": "BSC_BNB",
-      "contract_address": "Pending",
-      "type": "MANAGED",
-      "status": "Pending",
-      "partitions": [
-        "Class A",
-        "Class B",
-        "Class C"
-      ],
-      "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
-      "tx_hash": "",
-      "cobo_id": "394ce7ee-7273-4c58-85c1-6c54e53b51ae"
-    },
-    {
-      "name": "Cobo ERC1400 Test Token 3",
-      "symbol": "CETT3",
-      "chain_id": "BSC_BNB",
-      "contract_address": "Pending",
-      "type": "MANAGED",
-      "status": "Pending",
-      "partitions": [
-        "Class A",
-        "Class B"
-      ],
-      "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
-      "tx_hash": "",
-      "cobo_id": "9023833b-ba94-4521-a3ea-b3eca6e863ea"
-    },
-    {
       "name": "Self Custody ERC1400",
       "symbol": "SCE102",
       "chain_id": "BSC_BNB",
@@ -59,54 +14,37 @@
       "owner": "0x0E980Ca2b623535517BB6d914C9868Ea59d5635f",
       "tx_hash": "0x3e053d01d9b20a557c05b327df55d353b16f980924f03c1a5e19dc607f663dc0",
       "cobo_id": null
+    },
+    {
+      "name": "Test Token",
+      "symbol": "TST",
+      "chain_id": "BSC_BNB",
+      "contract_address": "0x3a8D222313F8FD5E894Cd89F6203C08D47927b8E",
+      "type": "MANAGED",
+      "status": "Deployed",
+      "partitions": [
+        "Test"
+      ],
+      "owner": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
+      "tx_hash": "0x138c97e67d8df331d414749c322b0e4ee5fd455e0787192ff482b501f8e358f9",
+      "cobo_id": "bb9d20d7-f644-44f3-992d-951f09e70896"
+    },
+    {
+      "name": "Test Token",
+      "symbol": "TST",
+      "chain_id": "MATIC_POLYGON",
+      "contract_address": "0xC068a87CC0E159aDF59E450659677F6aF1F989b0",
+      "type": "MANAGED",
+      "status": "Deployed",
+      "partitions": [
+        "Test"
+      ],
+      "owner": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
+      "tx_hash": "0x23c0ec2747a982b0f88c99495b3f62fe3251afba600824be1787e5e1f7f3eda1",
+      "cobo_id": "c87d5829-5e82-46e6-b7a3-83e7b60e6757"
     }
   ],
   "mints": [
-    {
-      "chain_id": "BSC_BNB",
-      "contract_address": "0x6D9F44f10784e3f815641494e6a01aC17b020196",
-      "partition": "Class A",
-      "to_address": "0xd4402d1e46f1b13b3d1e683b2604c93dd91075b9",
-      "amount": 50.0,
-      "tx_id": "3b643211-c144-4d29-9e8d-23b4ecd7d7d8",
-      "timestamp": 1732720000
-    },
-    {
-      "chain_id": "BSC_BNB",
-      "contract_address": "0x1Fd3C758B4F93CC4d098431c6B8d2fC7d5220352",
-      "partition": "Tranche 2",
-      "to_address": "0xd4402d1e46f1b13b3d1e683b2604c93dd91075b9",
-      "amount": 222.0,
-      "tx_id": "b9e47643-23c3-4a05-9c3a-ac0e39d83d5c",
-      "timestamp": 1732720000
-    },
-    {
-      "chain_id": "BSC_BNB",
-      "contract_address": "0x09d8210661f3a4e44d109c1921c09d30bbabf7d8",
-      "partition": "Common",
-      "to_address": "0x0e980ca2b623535517bb6d914c9868ea59d5635f",
-      "amount": 111.0,
-      "tx_id": "74aac8bd-4f78-4a56-8783-74592aebed56",
-      "timestamp": 1732720000
-    },
-    {
-      "chain_id": "BSC_BNB",
-      "contract_address": "0x6a8d5c82a6e9a60e97275b2c5f3f181b3f10fbcf",
-      "partition": "Class A",
-      "to_address": "0x0e980ca2b623535517bb6d914c9868ea59d5635f",
-      "amount": 222.0,
-      "tx_id": "d0177a4f-1a3c-4325-81e2-5bec345221b5",
-      "timestamp": 1732720000
-    },
-    {
-      "chain_id": "BSC_BNB",
-      "contract_address": "0x323245d27a2edf7f3a91d30a32ce772e319f9f87",
-      "partition": "Class B",
-      "to_address": "0x0e980ca2b623535517bb6d914c9868ea59d5635f",
-      "amount": 777.0,
-      "tx_id": "mock_mint_88459a75",
-      "timestamp": 1732720000
-    },
     {
       "chain_id": "BSC_BNB",
       "contract_address": "0x323245d27a2edf7f3a91d30a32ce772e319f9f87",
@@ -114,6 +52,24 @@
       "to_address": "0x0e980ca2b623535517bb6d914c9868ea59d5635f",
       "amount": 777.0,
       "tx_id": "0x0e6ad6fa913b0a8b04632718395b9c08538b0436c6f3530caf2ac467c22618c5",
+      "timestamp": 1732720000
+    },
+    {
+      "chain_id": "BSC_BNB",
+      "contract_address": "0x3a8D222313F8FD5E894Cd89F6203C08D47927b8E",
+      "partition": "Test",
+      "to_address": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
+      "amount": 666.0,
+      "tx_id": "4ee3e9e1-12aa-416d-b97c-8e8cf744c749",
+      "timestamp": 1732720000
+    },
+    {
+      "chain_id": "MATIC_POLYGON",
+      "contract_address": "0xC068a87CC0E159aDF59E450659677F6aF1F989b0",
+      "partition": "Test",
+      "to_address": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
+      "amount": 888.0,
+      "tx_id": "202b428c-11a2-49ff-958b-b15b24d0cc3e",
       "timestamp": 1732720000
     }
   ]

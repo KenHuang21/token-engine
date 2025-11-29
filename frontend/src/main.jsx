@@ -12,6 +12,7 @@ import { WagmiProvider } from 'wagmi';
 import {
   mainnet,
   bsc,
+  polygon,
   sepolia,
 } from 'wagmi/chains';
 import {
@@ -22,7 +23,7 @@ import {
 const config = getDefaultConfig({
   appName: 'White-Label Tokenization',
   projectId: 'YOUR_PROJECT_ID', // TODO: Replace with real ID or env
-  chains: [mainnet, bsc, sepolia],
+  chains: [mainnet, bsc, polygon, sepolia],
 });
 
 const queryClient = new QueryClient();

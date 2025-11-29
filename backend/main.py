@@ -56,6 +56,8 @@ def resolve_contract_address(tx_hash: str, chain_id: str = "BSC_BNB") -> Optiona
         rpc_url = "https://bsc-dataseed.binance.org/" # Default to BSC
         if chain_id == "ETH_SEPOLIA":
              rpc_url = "https://rpc.sepolia.org"
+        elif chain_id == "MATIC_POLYGON":
+             rpc_url = "https://polygon-rpc.com"
         
         w3 = Web3(Web3.HTTPProvider(rpc_url))
         receipt = w3.eth.get_transaction_receipt(tx_hash)
@@ -227,14 +229,17 @@ def deploy_token(req: DeployRequest):
             # Constructor args: name, symbol, partitions, owner
             # partitions needs to be bytes32[]
             partitions_bytes = [w3.to_bytes(text=p).ljust(32, b'\0') for p in req.partitions]
-            mock_owner = "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9"
+            
+            # Use the Cobo wallet address as owner so it can mint tokens
+            target_wallet_id = settings.cobo_default_wallet_id
+            owner_address = cobo_client.get_wallet_address(target_wallet_id, req.chain_id if req.chain_id != "MATIC_POLYGON" else "MATIC")
             
             # Build constructor transaction to get data
             tx = contract.constructor(
                 req.name,
                 req.symbol,
                 partitions_bytes,
-                w3.to_checksum_address(mock_owner)
+                w3.to_checksum_address(owner_address)
             ).build_transaction({
                 'from': '0x0000000000000000000000000000000000000000',
                 'gas': 0,
@@ -247,28 +252,34 @@ def deploy_token(req: DeployRequest):
             # Get a wallet ID (using the first available one for now, or hardcoded)
             # Ideally we pick one from the user's available wallets.
             # For MVP, let's find a funded wallet or use a default.
-            wallet_info = cobo_client.get_best_wallet(req.chain_id)
-            if wallet_info:
-                print(f"🚀 Sending Deployment TX to Cobo using wallet {wallet_info['wallet_id']}...")
-                cobo_tx_id = cobo_client.deploy_contract(
-                    chain_id=req.chain_id,
-                    wallet_id=wallet_info['wallet_id'],
-                    bytecode=bytecode_with_args
-                )
-                print(f"✅ Cobo Deployment TX ID: {cobo_tx_id}")
-                fake_tx = "" # Will be updated later
-                cobo_id = cobo_tx_id
-                fake_address = "Pending" 
-                status = "Pending"
-            else:
-                print("⚠️ No suitable wallet found for Cobo deployment. Falling back to mock.")
-                status = "Deployed"
-                cobo_id = None
+            
+            # Get default wallet from settings
+            target_wallet_id = settings.cobo_default_wallet_id
+            
+            print(f"🚀 Sending Deployment TX to Cobo using wallet {target_wallet_id}...")
+            cobo_tx_id = cobo_client.deploy_contract(
+                chain_id=req.chain_id,
+                wallet_id=target_wallet_id,
+                bytecode=bytecode_with_args
+            )
+            print(f"✅ Cobo Deployment TX ID: {cobo_tx_id}")
+            fake_tx = "" # Will be updated later
+            cobo_id = cobo_tx_id
+            fake_address = "Pending" 
+            status = "Pending"
                 
         except Exception as e:
-            print(f"⚠️ Cobo deployment failed: {e}. Falling back to mock.")
-            status = "Deployed"
-            cobo_id = None
+            print(f"⚠️ Cobo deployment failed: {e}")
+            # Return structured error instead of generic 500
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "detail": f"Deployment failed: {str(e)}",
+                    "error_type": type(e).__name__,
+                    "chain_id": req.chain_id
+                }
+            )
 
     new_contract = {
         "name": req.name,
@@ -381,7 +392,7 @@ def mint_tokens(req: MintRequest):
             print(f"🚀 Sending Mint TX to Cobo for {req.contract_address}...")
             cobo_tx_id = cobo_client.create_contract_call(
                 chain_id=req.chain_id,
-                wallet_id=contract.get("wallet_id", "e4288c49-bbf3-47f6-97e5-1bcf0060e53e"), # Fallback to default if missing
+                wallet_id=contract.get("wallet_id", settings.cobo_default_wallet_id), # Use default wallet
                 to_address=req.contract_address,
                 calldata=calldata,
                 amount=0
@@ -391,8 +402,17 @@ def mint_tokens(req: MintRequest):
             
         except Exception as e:
             print(f"❌ Cobo Mint Failed: {e}")
-            # Fallback to mock for now to not break UI if Cobo fails (e.g. invalid key)
-            pass
+            # Return structured error instead of silent fallback
+            from fastapi.responses import JSONResponse
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "detail": f"Mint failed: {str(e)}",
+                    "error_type": type(e).__name__,
+                    "chain_id": req.chain_id,
+                    "contract_address": req.contract_address
+                }
+            )
 
     new_mint = {
         "chain_id": req.chain_id,

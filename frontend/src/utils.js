@@ -7,6 +7,9 @@ export const getBlockExplorerUrl = (chain, address) => {
             return `https://sepolia.etherscan.io/address/${address}`;
         case 'BSC_BNB':
             return `https://bscscan.com/address/${address}`;
+        case 'MATIC_POLYGON':
+        case 'MATIC':
+            return `https://polygonscan.com/address/${address}`;
         default:
             return '#';
     }

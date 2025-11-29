@@ -4,13 +4,16 @@ import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { ChevronRight, Check, Plus, Trash2, Loader2, Layers, FileText, ShieldCheck } from 'lucide-react';
 import clsx from 'clsx';
+import ErrorDisplay from './ErrorDisplay';
 
 const API_URL = '/api';
 
 export default function DeployWizard({ onComplete }) {
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [mode, setMode] = useState('MANAGED'); // MANAGED or BYOW
+    const [network, setNetwork] = useState('BSC_BNB'); // BSC_BNB or MATIC_POLYGON
 
     const [formData, setFormData] = useState({
         name: '',
@@ -44,12 +47,13 @@ export default function DeployWizard({ onComplete }) {
 
     const handleDeploy = async () => {
         setLoading(true);
+        setError(null); // Clear previous errors
         try {
             const validPartitions = formData.partitions.filter(p => p.trim() !== '');
 
             if (mode === 'MANAGED') {
                 const res = await axios.post(`${API_URL}/tokens/deploy`, {
-                    chain_id: 'BSC_BNB',
+                    chain_id: network,
                     name: formData.name,
                     symbol: formData.symbol,
                     partitions: validPartitions,
@@ -61,13 +65,13 @@ export default function DeployWizard({ onComplete }) {
 
                 if (!walletClient) throw new Error("Wallet not connected");
 
-                // Enforce BSC Network
-                const targetChainId = 56; // BSC Mainnet
+                // Enforce Network
+                const targetChainId = network === 'BSC_BNB' ? 56 : 137; // 56=BSC, 137=Polygon
                 if (chain?.id !== targetChainId) {
                     try {
                         await switchChainAsync({ chainId: targetChainId });
                     } catch (switchError) {
-                        throw new Error("Please switch your wallet to BSC Mainnet to deploy.");
+                        throw new Error(`Please switch your wallet to ${network === 'BSC_BNB' ? 'BSC' : 'Polygon'} to deploy.`);
                     }
                 }
 
@@ -98,7 +102,7 @@ export default function DeployWizard({ onComplete }) {
                 if (receipt.contractAddress) {
                     // Register with backend
                     await axios.post(`${API_URL}/tokens/register`, {
-                        chain_id: 'BSC_BNB', // Or map from chain.id
+                        chain_id: network, // Or map from chain.id
                         name: formData.name,
                         symbol: formData.symbol,
                         contract_address: receipt.contractAddress,
@@ -116,8 +120,11 @@ export default function DeployWizard({ onComplete }) {
             queryClient.invalidateQueries(['tokens']);
             onComplete();
         } catch (err) {
-            console.error(err);
-            alert(`Error: ${err.message}`);
+            console.error('Deployment error:', err);
+            setError({
+                message: err.response?.data?.detail || err.message || 'Failed to deploy token',
+                detail: err.response?.data?.error_type ? `Error Type: ${err.response.data.error_type}` : null
+            });
         } finally {
             setLoading(false);
         }
@@ -165,9 +172,12 @@ export default function DeployWizard({ onComplete }) {
                 </div>
 
                 <div className="p-8">
+                    {/* Error Display */}
+                    <ErrorDisplay error={error} onDismiss={() => setError(null)} />
+
                     {/* Step 1: Basics */}
                     {step === 1 && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="space-y-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-3">Custody Model</label>
                                 <div className="grid grid-cols-2 gap-4">
@@ -196,6 +206,40 @@ export default function DeployWizard({ onComplete }) {
                                     >
                                         <div className="font-semibold text-gray-900">Self-Custody</div>
                                         <div className="text-sm text-gray-500 mt-1">Deploy using your connected wallet (Metamask, etc).</div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="relative z-10">
+                                <label className="block text-sm font-medium text-gray-700 mb-3">Network (Selected: {network})</label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            console.log('Clicked BSC');
+                                            setNetwork('BSC_BNB');
+                                        }}
+                                        className={`p-3 rounded-lg border text-center font-medium transition-all cursor-pointer relative z-50 ${network === 'BSC_BNB'
+                                            ? "border-blue-600 bg-blue-50 text-blue-700"
+                                            : "border-gray-200 hover:border-gray-300 text-gray-600"
+                                            }`}
+                                    >
+                                        BNB Smart Chain (BSC)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            console.log('Clicked Polygon');
+                                            setNetwork('MATIC_POLYGON');
+                                        }}
+                                        className={`p-3 rounded-lg border text-center font-medium transition-all cursor-pointer relative z-50 ${network === 'MATIC_POLYGON'
+                                            ? "border-purple-600 bg-purple-50 text-purple-700"
+                                            : "border-gray-200 hover:border-gray-300 text-gray-600"
+                                            }`}
+                                    >
+                                        Polygon (MATIC)
                                     </button>
                                 </div>
                             </div>
@@ -273,6 +317,10 @@ export default function DeployWizard({ onComplete }) {
                                     <div>
                                         <dt className="text-sm text-gray-500">Custody Model</dt>
                                         <dd className="mt-1 text-sm font-medium text-gray-900">{mode === 'MANAGED' ? 'Managed (Cobo MPC)' : 'Self-Custody'}</dd>
+                                    </div>
+                                    <div>
+                                        <dt className="text-sm text-gray-500">Network</dt>
+                                        <dd className="mt-1 text-sm font-medium text-gray-900">{network === 'BSC_BNB' ? 'BNB Smart Chain' : 'Polygon'}</dd>
                                     </div>
                                     <div>
                                         <dt className="text-sm text-gray-500">Asset Name</dt>

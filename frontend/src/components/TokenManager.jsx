@@ -5,12 +5,14 @@ import axios from 'axios';
 import { sha256 } from 'js-sha256';
 import { ExternalLink, ArrowLeft } from 'lucide-react';
 import { getBlockExplorerUrl } from '../utils';
+import ErrorDisplay from './ErrorDisplay';
 
 const API_URL = '/api';
 
 export default function TokenManager({ token, onBack }) {
     const [activeTab, setActiveTab] = useState('holders'); // Default to holders as per screenshot
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [holders, setHolders] = useState([]);
     const { data: walletClient } = useWalletClient();
     const publicClient = usePublicClient();
@@ -100,8 +102,11 @@ export default function TokenManager({ token, onBack }) {
             setMintData({ ...mintData, amount: 0, to: '' });
             if (activeTab === 'holders') fetchHolders();
         } catch (err) {
-            console.error(err);
-            alert(`Error: ${err.message}`);
+            console.error('Minting error:', err);
+            setError({
+                message: err.response?.data?.detail || err.message || 'Failed to mint tokens',
+                detail: err.response?.data?.error_type ? `Error Type: ${err.response.data.error_type}` : null
+            });
         } finally {
             setLoading(false);
         }
@@ -188,6 +193,8 @@ export default function TokenManager({ token, onBack }) {
                     {activeTab === 'mint' && (
                         <div className="max-w-lg">
                             <h3 className="font-bold mb-4">Mint New Tokens</h3>
+                            <ErrorDisplay error={error} onDismiss={() => setError(null)} />
+
                             <form onSubmit={handleMint} className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-bold mb-1">Partition</label>

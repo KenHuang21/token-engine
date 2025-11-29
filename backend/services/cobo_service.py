@@ -12,6 +12,13 @@ from cobo_waas2.models.contract_call_destination import ContractCallDestination
 from cobo_waas2.models.contract_call_destination_type import ContractCallDestinationType
 from cobo_waas2.models.evm_contract_call_destination import EvmContractCallDestination
 from cobo_waas2.models.transaction_type import TransactionType
+from cobo_waas2.models.estimate_fee_params import EstimateFeeParams
+from cobo_waas2.models.estimate_contract_call_fee_params import EstimateContractCallFeeParams
+from cobo_waas2.models.estimate_fee_request_type import EstimateFeeRequestType
+from cobo_waas2.models.transaction_request_evm_eip1559_fee import TransactionRequestEvmEip1559Fee
+from cobo_waas2.models.transaction_request_evm_legacy_fee import TransactionRequestEvmLegacyFee
+from cobo_waas2.models.transaction_request_fee import TransactionRequestFee
+from cobo_waas2.models.fee_type import FeeType
 from cobo_waas2.crypto.local_ed25519_signer import LocalEd25519Signer
 from backend.config.settings import settings
 
@@ -217,6 +224,97 @@ class CoboClient:
             # In production, we would call list_token_balances.
             print(f"✅ Found wallet: {w['name']} ({address}) Type: {w['type']} Subtype: {w['subtype']}")
             return {"wallet_id": wallet_id, "address": address, "subtype": w['subtype']}
+
+    def estimate_and_get_fee(self, chain_id: str, source, destination):
+        """
+        Estimates fee and returns the 'Fast' fee configuration.
+        Returns None if estimation fails.
+        """
+        try:
+            print(f"Estimating fee for {chain_id}...")
+            # Map internal chain IDs if necessary
+            api_chain_id = chain_id
+            if chain_id == "MATIC_POLYGON":
+                api_chain_id = "MATIC" # User confirmed chain_id is MATIC
+            
+            params = EstimateContractCallFeeParams(
+                request_id=str(uuid.uuid4()),
+                request_type=EstimateFeeRequestType.CONTRACTCALL,
+                chain_id=api_chain_id,
+                source=source,
+                destination=destination
+            )
+            
+            req = EstimateFeeParams(actual_instance=params)
+            resp = self.transactions_api.estimate_fee(req)
+            
+            # Extract Fast fee
+            if hasattr(resp.actual_instance, 'fast'):
+                fast_fee = resp.actual_instance.fast
+                print(f"✅ Fee Estimated (Fast): gas_price={fast_fee.gas_price if hasattr(fast_fee, 'gas_price') else 'N/A'}, gas_limit={fast_fee.gas_limit}")
+                
+                 # For deployment, use higher gas limit
+                # Cobo's estimation may not account for large deployments
+                deployment_gas_limit = "5000000"  # 5M gas for deployment
+                
+                # Determine correct token_id
+                token_id = api_chain_id  # Use api_chain_id directly (MATIC for Polygon, BSC_BNB for BSC)
+                
+                # Construct TransactionRequestFee with estimated gas price but higher gas limit
+                # EIP-1559
+                if hasattr(fast_fee, 'max_fee_per_gas') and hasattr(fast_fee, 'max_priority_fee_per_gas'):
+                     return TransactionRequestFee(
+                        actual_instance=TransactionRequestEvmEip1559Fee(
+                            max_fee_per_gas=fast_fee.max_fee_per_gas,
+                            max_priority_fee_per_gas=fast_fee.max_priority_fee_per_gas,
+                            gas_limit=deployment_gas_limit,  # Override with higher limit
+                            fee_type=resp.actual_instance.fee_type,
+                            token_id=token_id
+                        )
+                    )
+                # Legacy
+                elif hasattr(fast_fee, 'gas_price'):
+                    return TransactionRequestFee(
+                        actual_instance=TransactionRequestEvmLegacyFee(
+                            gas_price=fast_fee.gas_price,
+                            gas_limit=deployment_gas_limit,  # Override with higher limit
+                            fee_type=resp.actual_instance.fee_type,
+                            token_id=token_id
+                        )
+                    )
+            
+            print("⚠️ Could not extract 'fast' fee from response.")
+            return None
+            
+            
+        except Exception as e:
+            print(f"⚠️  Fee estimation failed: {e}")
+            print(f"Using fallback 'Fast' fee for {api_chain_id}")
+            
+            # Fallback to predefined "Fast" fees
+            if api_chain_id == "MATIC":
+                return TransactionRequestFee(
+                    actual_instance=TransactionRequestEvmLegacyFee(
+                        gas_price='150000000000',  # 150 Gwei (aggressive for Polygon)
+                        fee_type=FeeType.EVM_LEGACY,
+                        token_id='MATIC_MATIC',  # Polygon native gas token
+                        gas_limit='300000'
+                    )
+                )
+            elif api_chain_id == "BSC_BNB":
+                return TransactionRequestFee(
+                    actual_instance=TransactionRequestEvmLegacyFee(
+                        gas_price='5000000000',  # 5 Gwei (fast for BSC)
+                        fee_type=FeeType.EVM_LEGACY,
+                        token_id='BSC_BNB',  # BSC native gas token
+                        gas_limit='300000'
+                    )
+                )
+            
+            # Ultimate fallback
+            print("⚠️  No fallback fee available for this chain, using None")
+            return None
+
             
     def create_contract_call(self, chain_id: str, wallet_id: str, to_address: str, calldata: str, amount: int = 0):
         """
@@ -225,12 +323,17 @@ class CoboClient:
         try:
             if not self.transactions_api:
                 raise Exception("Cobo API not initialized")
+            
+            # Map internal chain IDs if necessary
+            api_chain_id = chain_id
+            if chain_id == "MATIC_POLYGON":
+                api_chain_id = "MATIC"
 
             source = ContractCallSource(
                 actual_instance=CustodialWeb3ContractCallSource(
                     source_type=ContractCallSourceType.WEB3,
                     wallet_id=wallet_id,
-                    address=self.get_wallet_address(wallet_id, chain_id)
+                    address=self.get_wallet_address(wallet_id, api_chain_id)
                 )
             )
             
@@ -242,18 +345,22 @@ class CoboClient:
                     amount=str(amount)
                 )
             )
+        
+            # Estimate Fee - needed for correct gas limits and pricing
+            fee = self.estimate_and_get_fee(chain_id, source, destination)
             
             params = ContractCallParams(
                 request_id=str(uuid.uuid4()), # Ensure unique ID for every request
-                chain_id=chain_id,
+                chain_id=api_chain_id,
                 source=source,
                 destination=destination,
-                description="Mint Token via TokenEngine"
+                description="Mint Token via TokenEngine",
+                fee=fee  # Use estimated fee
             )
             
             response = self.transactions_api.create_contract_call_transaction(params)
             return response.transaction_id
-            
+                
         except Exception as e:
             print(f"Failed to create contract call: {e}")
             raise e
@@ -265,12 +372,17 @@ class CoboClient:
         try:
             if not self.transactions_api:
                 raise Exception("Cobo API not initialized")
+            
+            # Map internal chain IDs if necessary
+            api_chain_id = chain_id
+            if chain_id == "MATIC_POLYGON":
+                api_chain_id = "MATIC"
 
             source = ContractCallSource(
                 actual_instance=CustodialWeb3ContractCallSource(
                     source_type=ContractCallSourceType.WEB3,
                     wallet_id=wallet_id,
-                    address=self.get_wallet_address(wallet_id, chain_id)
+                    address=self.get_wallet_address(wallet_id, api_chain_id)
                 )
             )
             
@@ -284,13 +396,18 @@ class CoboClient:
                     amount=str(amount)
                 )
             )
+        
+            # Estimate Fee for deployment - needed to get correct gas limit
+            # Deployments need much higher gas limits than simple transfers
+            fee = self.estimate_and_get_fee(chain_id, source, destination)
             
             params = ContractCallParams(
                 request_id=str(uuid.uuid4()),
-                chain_id=chain_id,
+                chain_id=api_chain_id,
                 source=source,
                 destination=destination,
-                description="Deploy Token via TokenEngine"
+                description="Deploy Token via TokenEngine",
+                fee=fee  # Use estimated fee for deployment
             )
             
             response = self.transactions_api.create_contract_call_transaction(params)
