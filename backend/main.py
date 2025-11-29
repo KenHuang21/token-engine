@@ -12,7 +12,10 @@ from backend.config.settings import settings
 print(f"DEBUG: Cobo URL from settings: {settings.cobo_api_url}")
 print(f"DEBUG: Cobo Key present: {bool(settings.cobo_api_private_key)}")
 # --- 1. App Initialization ---
-app = FastAPI(title="White-Label Tokenization Platform")
+app = FastAPI(
+    title="White-Label Tokenization Platform",
+    root_path="/api" if os.environ.get("VERCEL") else ""
+)
 
 # --- 2. CORS Configuration (CRITICAL) ---
 # This whitelist MUST include your Vercel URL exactly as it appears in the browser bar
