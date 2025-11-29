@@ -72,6 +72,21 @@
       "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
       "tx_hash": "0x46707ffc6105fb76455624f3df8d46f5146f07d8ccc8fe4552ab1f3a665b6c7a",
       "cobo_id": "5f15442c-3d1c-4c89-beac-e512cd8a456d"
+    },
+    {
+      "name": "ERC1400 UI Augment",
+      "symbol": "EUA1",
+      "chain_id": "BSC_BNB",
+      "contract_address": "0x101A1E0eFE338f112b6CA32d7B0236B0B698B4D4",
+      "type": "MANAGED",
+      "status": "Deployed",
+      "partitions": [
+        "Class A",
+        "Class B"
+      ],
+      "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
+      "tx_hash": "0x74f5c3af830d1f8665dbb3416c8815c011af079530a36f5904716e2893780eaf",
+      "cobo_id": "82e3bb34-bccb-42e2-bce9-30f779622a1f"
     }
   ],
   "mints": [
@@ -118,6 +133,15 @@
       "to_address": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
       "amount": 1111.0,
       "tx_id": "89a6f8d0-ebe9-428f-97b7-50ec12d95eb6",
+      "timestamp": 1732720000
+    },
+    {
+      "chain_id": "BSC_BNB",
+      "contract_address": "0xE802Da1bc5E90E708aEf098Ae46517294df1487F",
+      "partition": "Class A",
+      "to_address": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
+      "amount": 222.0,
+      "tx_id": "c0332f45-b3b9-475d-a8f8-71b6504e1edd",
       "timestamp": 1732720000
     }
   ]

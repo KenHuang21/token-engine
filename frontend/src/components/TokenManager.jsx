@@ -3,14 +3,15 @@ import { useWalletClient, usePublicClient } from 'wagmi';
 import { parseEther, pad, toHex } from 'viem';
 import axios from 'axios';
 import { sha256 } from 'js-sha256';
-import { ExternalLink, ArrowLeft } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Users, Coins, FileText, Upload, RefreshCw } from 'lucide-react';
 import { getBlockExplorerUrl } from '../utils';
 import ErrorDisplay from './ErrorDisplay';
+import clsx from 'clsx';
 
 const API_URL = '/api';
 
 export default function TokenManager({ token, onBack }) {
-    const [activeTab, setActiveTab] = useState('holders'); // Default to holders as per screenshot
+    const [activeTab, setActiveTab] = useState('holders');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [holders, setHolders] = useState([]);
@@ -143,65 +144,95 @@ export default function TokenManager({ token, onBack }) {
         }
     };
 
+    const tabs = [
+        { id: 'holders', label: 'Holders', icon: Users },
+        { id: 'mint', label: 'Minting', icon: Coins },
+        { id: 'docs', label: 'Documents', icon: FileText },
+    ];
+
     return (
-        <div className="space-y-4">
-            <button onClick={onBack} className="border border-gray-400 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200">
-                ← Back to Dashboard
+        <div className="space-y-6">
+            <button onClick={onBack} className="flex items-center text-sm text-slate-500 hover:text-indigo-600 transition-colors">
+                <ArrowLeft className="w-4 h-4 mr-1" /> Back to Dashboard
             </button>
 
-            <div className="border border-black p-4 bg-white">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h2 className="text-xl font-bold">{token.name} ({token.symbol})</h2>
-                        <div className="text-sm mt-1">
-                            {token.chain_id} • {token.status}
+            <div className="card">
+                <div className="p-6 border-b border-slate-200">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h2 className="text-2xl font-bold text-slate-900">{token.name} <span className="text-slate-400 font-normal">({token.symbol})</span></h2>
+                            <div className="flex items-center gap-3 mt-2 text-sm">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                    {token.chain_id}
+                                </span>
+                                <span className={clsx(
+                                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                                    token.status === 'Deployed' ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                                )}>
+                                    {token.status}
+                                </span>
+                                <div className="flex items-center gap-1 text-slate-500 font-mono">
+                                    {token.contract_address}
+                                    <a
+                                        href={getBlockExplorerUrl(token.chain_id, token.contract_address)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-indigo-600 hover:text-indigo-800"
+                                    >
+                                        <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <div className="text-sm font-mono mt-1 flex items-center gap-1">
-                            Contract:
-                            <a
-                                href={getBlockExplorerUrl(token.chain_id, token.contract_address)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline flex items-center gap-1"
+                        <div className="text-right">
+                            <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-slate-900 text-white">
+                                {token.type.replace('_', ' ')}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="border-b border-slate-200">
+                    <nav className="flex -mb-px px-6 gap-6" aria-label="Tabs">
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={clsx(
+                                    "group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors",
+                                    activeTab === tab.id
+                                        ? "border-indigo-600 text-indigo-600"
+                                        : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                                )}
                             >
-                                {token.contract_address}
-                                <ExternalLink className="w-3 h-3" />
-                            </a>
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <span className="border border-black px-2 py-1 text-xs font-bold uppercase">
-                            {token.type}
-                        </span>
-                    </div>
+                                <tab.icon className={clsx(
+                                    "mr-2 h-4 w-4",
+                                    activeTab === tab.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-500"
+                                )} />
+                                {tab.label}
+                            </button>
+                        ))}
+                    </nav>
                 </div>
 
-                <div className="mt-6 border border-black flex">
-                    {['mint', 'holders', 'docs'].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`flex-1 py-2 text-center font-bold border-r border-black last:border-r-0 ${activeTab === tab ? 'bg-gray-200' : 'hover:bg-gray-50'
-                                }`}
-                        >
-                            {tab === 'mint' ? 'Minting' : tab === 'holders' ? 'Holders' : 'Documents'}
-                        </button>
-                    ))}
-                </div>
+                <div className="p-6">
+                    <ErrorDisplay error={error} onDismiss={() => setError(null)} />
 
-                <div className="mt-4">
                     {activeTab === 'mint' && (
-                        <div className="max-w-lg">
-                            <h3 className="font-bold mb-4">Mint New Tokens</h3>
-                            <ErrorDisplay error={error} onDismiss={() => setError(null)} />
+                        <div className="max-w-xl mx-auto">
+                            <div className="text-center mb-8">
+                                <h3 className="text-lg font-medium text-slate-900">Mint New Tokens</h3>
+                                <p className="text-sm text-slate-500">Issue new tokens to a specific wallet address.</p>
+                            </div>
 
-                            <form onSubmit={handleMint} className="space-y-4">
+                            <form onSubmit={handleMint} className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-bold mb-1">Partition</label>
+                                    <label className="label">Tranche / Partition</label>
                                     <select
                                         value={mintData.partition}
                                         onChange={(e) => setMintData({ ...mintData, partition: e.target.value })}
-                                        className="w-full border border-black p-2"
+                                        className="input-field"
                                     >
                                         {token.partitions.map(p => (
                                             <option key={p} value={p}>{p}</option>
@@ -209,26 +240,36 @@ export default function TokenManager({ token, onBack }) {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold mb-1">Recipient</label>
+                                    <label className="label">Recipient Address</label>
                                     <input
                                         type="text"
                                         value={mintData.to}
                                         onChange={(e) => setMintData({ ...mintData, to: e.target.value })}
-                                        className="w-full border border-black p-2 font-mono"
+                                        className="input-field font-mono"
                                         placeholder="0x..."
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold mb-1">Amount</label>
-                                    <input
-                                        type="number"
-                                        value={mintData.amount}
-                                        onChange={(e) => setMintData({ ...mintData, amount: parseInt(e.target.value) })}
-                                        className="w-full border border-black p-2"
-                                    />
+                                    <label className="label">Amount</label>
+                                    <div className="relative rounded-md shadow-sm">
+                                        <input
+                                            type="number"
+                                            value={mintData.amount}
+                                            onChange={(e) => setMintData({ ...mintData, amount: parseInt(e.target.value) })}
+                                            className="input-field pr-12"
+                                            placeholder="0"
+                                        />
+                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <span className="text-slate-500 sm:text-sm">{token.symbol}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button type="submit" disabled={loading} className="bg-black text-white px-4 py-2 font-bold">
-                                    {loading ? 'Minting...' : 'Mint Tokens'}
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full btn-primary py-3"
+                                >
+                                    {loading ? 'Processing...' : 'Mint Tokens'}
                                 </button>
                             </form>
                         </div>
@@ -236,81 +277,112 @@ export default function TokenManager({ token, onBack }) {
 
                     {activeTab === 'holders' && (
                         <div>
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="font-bold">Token Holders</h3>
-                                <button onClick={fetchHolders} className="border border-black px-2 py-1 text-xs">
-                                    Refresh
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-lg font-medium text-slate-900">Token Holders</h3>
+                                <button onClick={fetchHolders} className="btn-secondary text-xs">
+                                    <RefreshCw className="w-3 h-3 mr-1.5" /> Refresh
                                 </button>
                             </div>
-                            <table className="w-full border-collapse border border-black">
-                                <thead className="bg-gray-100">
-                                    <tr>
-                                        <th className="border border-black px-4 py-2 text-left text-xs uppercase">Address</th>
-                                        <th className="border border-black px-4 py-2 text-left text-xs uppercase">Tranche</th>
-                                        <th className="border border-black px-4 py-2 text-right text-xs uppercase">Balance</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {holders.map((h, i) => (
-                                        <tr key={i}>
-                                            <td className="border border-black px-4 py-2 font-mono text-sm">
-                                                <a
-                                                    href={getBlockExplorerUrl(token.chain_id, h.address)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-600 hover:underline"
-                                                >
-                                                    {h.address}
-                                                </a>
-                                            </td>
-                                            <td className="border border-black px-4 py-2 text-sm">{h.partition}</td>
-                                            <td className="border border-black px-4 py-2 text-right text-sm">{h.balance}</td>
-                                        </tr>
-                                    ))}
-                                    {holders.length === 0 && (
+
+                            <div className="overflow-hidden rounded-lg border border-slate-200">
+                                <table className="min-w-full divide-y divide-slate-200">
+                                    <thead className="bg-slate-50">
                                         <tr>
-                                            <td colSpan="3" className="border border-black px-4 py-8 text-center text-gray-500">
-                                                No holders found.
-                                            </td>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Address</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Tranche</th>
+                                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Balance</th>
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-slate-200">
+                                        {holders.map((h, i) => (
+                                            <tr key={i} className="hover:bg-slate-50">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-indigo-600">
+                                                    <a
+                                                        href={getBlockExplorerUrl(token.chain_id, h.address)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="hover:underline"
+                                                    >
+                                                        {h.address}
+                                                    </a>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
+                                                        {h.partition}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 text-right font-medium">
+                                                    {h.balance} {token.symbol}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {holders.length === 0 && (
+                                            <tr>
+                                                <td colSpan="3" className="px-6 py-12 text-center text-slate-500">
+                                                    No holders found.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
 
                     {activeTab === 'docs' && (
-                        <div className="max-w-lg">
-                            <h3 className="font-bold mb-4">Upload Document</h3>
-                            <form onSubmit={handleDocSubmit} className="space-y-4">
+                        <div className="max-w-xl mx-auto">
+                            <div className="text-center mb-8">
+                                <h3 className="text-lg font-medium text-slate-900">Upload Document</h3>
+                                <p className="text-sm text-slate-500">Attach legal documents or whitepapers to this asset.</p>
+                            </div>
+
+                            <form onSubmit={handleDocSubmit} className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-bold mb-1">Name</label>
+                                    <label className="label">Document Name</label>
                                     <input
                                         type="text"
                                         value={docData.name}
                                         onChange={(e) => setDocData({ ...docData, name: e.target.value })}
-                                        className="w-full border border-black p-2"
+                                        className="input-field"
+                                        placeholder="e.g. Offering Memorandum"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold mb-1">URI</label>
+                                    <label className="label">Document URI</label>
                                     <input
                                         type="url"
                                         value={docData.uri}
                                         onChange={(e) => setDocData({ ...docData, uri: e.target.value })}
-                                        className="w-full border border-black p-2"
+                                        className="input-field"
+                                        placeholder="https://..."
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold mb-1">Hash</label>
-                                    <input
-                                        type="file"
-                                        onChange={handleFileUpload}
-                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border file:border-black file:text-sm file:font-semibold file:bg-gray-50 file:text-black hover:file:bg-gray-100"
-                                    />
-                                    {docData.hash && <div className="mt-1 text-xs font-mono">{docData.hash}</div>}
+                                    <label className="label">Document Hash</label>
+                                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors cursor-pointer relative">
+                                        <div className="space-y-1 text-center">
+                                            <Upload className="mx-auto h-12 w-12 text-slate-400" />
+                                            <div className="flex text-sm text-slate-600">
+                                                <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                                                    <span>Upload a file</span>
+                                                    <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileUpload} />
+                                                </label>
+                                                <p className="pl-1">to generate hash</p>
+                                            </div>
+                                            <p className="text-xs text-slate-500">PDF, DOCX up to 10MB</p>
+                                        </div>
+                                    </div>
+                                    {docData.hash && (
+                                        <div className="mt-2 p-2 bg-slate-50 rounded text-xs font-mono text-slate-600 break-all border border-slate-200">
+                                            Hash: {docData.hash}
+                                        </div>
+                                    )}
                                 </div>
-                                <button type="submit" disabled={loading} className="bg-black text-white px-4 py-2 font-bold">
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full btn-primary py-3"
+                                >
                                     Attach Document
                                 </button>
                             </form>

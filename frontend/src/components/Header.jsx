@@ -13,28 +13,28 @@ export default function Header({ activeTab }) {
     };
 
     return (
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-40">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40 shadow-sm">
             {/* Breadcrumbs */}
-            <div className="flex items-center text-sm text-gray-500">
-                <span className="hover:text-gray-900 cursor-pointer transition-colors">Dashboard</span>
-                <ChevronRight className="w-4 h-4 mx-2 text-gray-400" />
-                <span className="font-medium text-gray-900">{getBreadcrumb()}</span>
+            <div className="flex items-center text-sm">
+                <span className="text-slate-500 hover:text-slate-900 cursor-pointer transition-colors">Dashboard</span>
+                <ChevronRight className="w-4 h-4 mx-2 text-slate-400" />
+                <span className="font-medium text-slate-900">{getBreadcrumb()}</span>
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-4">
                 {/* Search (Visual Only) */}
                 <div className="relative hidden md:block">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                         type="text"
                         placeholder="Search assets..."
-                        className="pl-9 pr-4 py-1.5 text-sm border border-gray-200 rounded-full focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 w-64 transition-all"
+                        className="pl-9 pr-4 py-1.5 text-sm border border-slate-200 rounded-full focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-64 transition-all placeholder:text-slate-400"
                     />
                 </div>
 
                 {/* Notifications */}
-                <button className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100">
+                <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100">
                     <Bell className="w-5 h-5" />
                     <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>
@@ -73,7 +73,7 @@ export default function Header({ activeTab }) {
                                     {(() => {
                                         if (!connected) {
                                             return (
-                                                <button onClick={openConnectModal} type="button" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors shadow-sm shadow-blue-200">
+                                                <button onClick={openConnectModal} type="button" className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors shadow-sm shadow-indigo-200">
                                                     Connect Wallet
                                                 </button>
                                             );
@@ -88,10 +88,10 @@ export default function Header({ activeTab }) {
                                         }
 
                                         return (
-                                            <div className="flex items-center gap-2 bg-gray-50 rounded-full p-1 pr-4 border border-gray-200">
+                                            <div className="flex items-center gap-2 bg-slate-50 rounded-full p-1 pr-4 border border-slate-200">
                                                 <button
                                                     onClick={openChainModal}
-                                                    className="flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-sm border border-gray-100"
+                                                    className="flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100"
                                                 >
                                                     {chain.hasIcon && (
                                                         <div
@@ -115,7 +115,7 @@ export default function Header({ activeTab }) {
                                                     )}
                                                 </button>
 
-                                                <button onClick={openAccountModal} type="button" className="text-sm font-medium text-gray-700 font-mono">
+                                                <button onClick={openAccountModal} type="button" className="text-sm font-medium text-slate-700 font-mono">
                                                     {account.displayName}
                                                     {account.displayBalance
                                                         ? ` (${account.displayBalance})`

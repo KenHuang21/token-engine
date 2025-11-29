@@ -1,0 +1,50 @@
+Symbol: ADA, ChainID: ADA, TokenID: ADA, Name: Cardano
+Symbol: AISI, ChainID: ETH, TokenID: AISI, Name: AISI GROUP
+Symbol: ALGEN, ChainID: ALGEN_ALG, TokenID: ALGEN_ALG, Name: Algen L1 Mainnet
+Symbol: USDV, ChainID: ALGEN_ALG, TokenID: ALGEN_USDV, Name: USDV
+Symbol: ALGO, ChainID: ALGO, TokenID: ALGO, Name: Algorand
+Symbol: APT, ChainID: APT, TokenID: APT, Name: Aptos Autumn
+Symbol: USDT, ChainID: APT, TokenID: APT_USDT, Name: USDT
+Symbol: ABG, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_ABG, Name: ABITCOINGOLD COIN
+Symbol: AIDOGE, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_AIDOGE, Name: AIDOGE
+Symbol: ALTR, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_ALTR, Name: Altranium
+Symbol: ANIME, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_ANIME, Name: Animecoin
+Symbol: APE, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_APE, Name: ApeCoin
+Symbol: APEX, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_APEX, Name: ApeX Token
+Symbol: ARB, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_ARB, Name: Arbitrum
+Symbol: ARC, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_ARC, Name: Arcadeum
+Symbol: ARW, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_ARW, Name: Arowana
+Symbol: Avive, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_AVIVE, Name: Avive
+Symbol: BDG, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_BDG, Name: Beyond Gaming
+Symbol: BEBE, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_BEBE, Name: BEBE
+Symbol: BLADE, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_BLADE, Name: BladeGames
+Symbol: BVM, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_BVM, Name: BVM
+Symbol: CATCH, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_CATCH, Name: CATCH
+Symbol: cbBTC, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_CBBTC, Name: Coinbase Wrapped BTC
+Symbol: CBL, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_CBL, Name: Credbull
+Symbol: CRV, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_CRV, Name: Curve DAO Token
+Symbol: DAI, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_DAI, Name: Dai Stablecoin
+Symbol: DBR-10x, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_DBR10X, Name: DBR-10x
+Symbol: DODO, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_DODO, Name: DODO bird
+Symbol: ENO, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_ENO, Name: EnoToken
+Symbol: ETH, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_ETH, Name: Ethereum layer2 ARBITRUM ETH
+Symbol: ETHFI, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_ETHFI, Name: ether.fi governance token
+Symbol: EVA, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_EVA, Name: EverValueCoin
+Symbol: ezETH, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_EZETH, Name: Renzo Restaked ETH
+Symbol: FBTC, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_FBTC, Name: Fire Bitcoin
+Symbol: FLAME, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_FLAME, Name: Flame Token
+Symbol: FLC, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_FLC2, Name: Flooring Lab Credit
+Symbol: G7, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_G7, Name: Game7
+Symbol: GMX, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_GMX, Name: GMX
+Symbol: GOF, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_GOF, Name: GameonForge
+Symbol: H20, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_H20, Name: H20
+Symbol: HDN, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_HDN, Name: Hydranet
+Symbol: HIP, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_HIP, Name: HIPPOP
+Symbol: HUNTER, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_HUNTER, Name: Hunter
+Symbol: IXORA, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_IXORA, Name: IXORAPAD
+Symbol: JOE, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_JOE, Name: JoeToken
+Symbol: K, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_K, Name: Kinto
+Symbol: KIMA, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_KIMA, Name: KIMA
+Symbol: LAVA, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_LAVA, Name: Axelar Wrapped LAVA
+Symbol: LDO, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_LDO, Name: Lido DAO Token
+Symbol: LOGX, ChainID: ARBITRUM_ETH, TokenID: ARBITRUM_LOGX, Name: LogX Network
