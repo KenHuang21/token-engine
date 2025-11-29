@@ -159,7 +159,7 @@ def list_tokens():
                 print(f"Checking status for pending contract {c['name']} (Cobo ID: {c['cobo_id']})...")
                 tx_details = cobo_client.get_transaction(c['cobo_id'])
                 
-                if tx_details and str(tx_details.status) == "TransactionStatus.SUCCESS":
+                if tx_details and (str(tx_details.status) == "TransactionStatus.COMPLETED" or str(tx_details.status) == "TransactionStatus.CONFIRMED" or str(tx_details.status) == "TransactionStatus.SUCCESS"):
                     # Transaction confirmed by Cobo. Now get on-chain address.
                     chain_tx_hash = tx_details.transaction_hash
                     print(f"Cobo TX Success. Chain Hash: {chain_tx_hash}")
@@ -353,6 +353,19 @@ def register_mint(req: RegisterMintRequest):
 # FIX: Renamed from /mint to /tokens/mint to match Frontend
 @app.post("/tokens/mint")
 def mint_tokens(req: MintRequest):
+    print(f"🚀 Minting {req.amount} tokens to {req.to_address}...")
+    
+    # Check if contract address is valid
+    if req.contract_address == "Pending":
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=400,
+            content={
+                "detail": "Contract deployment is still pending. Please wait for the contract to be deployed and refresh the page.",
+                "error_type": "ContractPending"
+            }
+        )
+        
     tx_id = f"mock_mint_{os.urandom(4).hex()}"
     
     # 1. Find contract to check type and get wallet_id

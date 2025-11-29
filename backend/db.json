@@ -42,6 +42,36 @@
       "owner": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
       "tx_hash": "0x23c0ec2747a982b0f88c99495b3f62fe3251afba600824be1787e5e1f7f3eda1",
       "cobo_id": "c87d5829-5e82-46e6-b7a3-83e7b60e6757"
+    },
+    {
+      "name": "BNB ERC1400 By Cobo Test 2",
+      "symbol": "BECT2",
+      "chain_id": "BSC_BNB",
+      "contract_address": "0xE802Da1bc5E90E708aEf098Ae46517294df1487F",
+      "type": "MANAGED",
+      "status": "Deployed",
+      "partitions": [
+        "Class A",
+        "Class B"
+      ],
+      "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
+      "tx_hash": "0x2f4642cc26fbdb3e9e0ea7fd7134e925353b75d5510c32e8a20aadf4fe191bb1",
+      "cobo_id": "4f42c9f3-aa16-4faf-9c13-cee4a38a6d76"
+    },
+    {
+      "name": "Matic ERC1400 By Cobo Test 2",
+      "symbol": "MEBC3",
+      "chain_id": "MATIC_POLYGON",
+      "contract_address": "0x739F3e429E0FD9cCF061991eF51A6Aac62deBA20",
+      "type": "MANAGED",
+      "status": "Deployed",
+      "partitions": [
+        "Class A",
+        "Class B"
+      ],
+      "owner": "0xD4402D1e46f1B13b3D1E683b2604C93dD91075B9",
+      "tx_hash": "0x46707ffc6105fb76455624f3df8d46f5146f07d8ccc8fe4552ab1f3a665b6c7a",
+      "cobo_id": "5f15442c-3d1c-4c89-beac-e512cd8a456d"
     }
   ],
   "mints": [
@@ -70,6 +100,24 @@
       "to_address": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
       "amount": 888.0,
       "tx_id": "202b428c-11a2-49ff-958b-b15b24d0cc3e",
+      "timestamp": 1732720000
+    },
+    {
+      "chain_id": "BSC_BNB",
+      "contract_address": "0xE802Da1bc5E90E708aEf098Ae46517294df1487F",
+      "partition": "Class B",
+      "to_address": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
+      "amount": 1234.0,
+      "tx_id": "9712b155-59b0-42a5-b1cd-618d65c053da",
+      "timestamp": 1732720000
+    },
+    {
+      "chain_id": "MATIC_POLYGON",
+      "contract_address": "0x739F3e429E0FD9cCF061991eF51A6Aac62deBA20",
+      "partition": "Class A",
+      "to_address": "0x7d773721f93a04686358d13ab5a03da39cb907dc",
+      "amount": 1111.0,
+      "tx_id": "89a6f8d0-ebe9-428f-97b7-50ec12d95eb6",
       "timestamp": 1732720000
     }
   ]
