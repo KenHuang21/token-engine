@@ -36,7 +36,20 @@ app.add_middleware(
 
 # --- 3. Database Mock (File Persistence) ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(BASE_DIR, "db.json")
+if os.environ.get("VERCEL"):
+    DB_FILE = "/tmp/db.json"
+    # Copy initial db.json to /tmp if it doesn't exist
+    if not os.path.exists(DB_FILE):
+        import shutil
+        initial_db = os.path.join(BASE_DIR, "db.json")
+        if os.path.exists(initial_db):
+            try:
+                shutil.copy(initial_db, DB_FILE)
+                print(f"DEBUG: Copied {initial_db} to {DB_FILE}")
+            except Exception as e:
+                print(f"DEBUG: Failed to copy db.json: {e}")
+else:
+    DB_FILE = os.path.join(BASE_DIR, "db.json")
 
 def get_contracts():
     """Safe read of the DB file."""
