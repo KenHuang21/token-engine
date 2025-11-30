@@ -9,8 +9,13 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      # These placeholders force you to input the real keys in the dashboard
       - key: COBO_API_PUBLIC_KEY
         sync: false
       - key: COBO_API_PRIVATE_KEY
+        sync: false
+      - key: COBO_API_URL
+        value: https://api.cobo.com/v2
+      - key: CHAIN_ID
+        value: MATIC_POLYGON
+      - key: COBO_DEFAULT_WALLET_ID
         sync: false
