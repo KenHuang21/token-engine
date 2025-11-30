@@ -6,7 +6,7 @@ import { ChevronRight, Check, Plus, Trash2, Loader2, Layers, FileText, ShieldChe
 import clsx from 'clsx';
 import ErrorDisplay from './ErrorDisplay';
 
-const API_URL = '/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export default function DeployWizard({ onComplete }) {
     const [step, setStep] = useState(1);

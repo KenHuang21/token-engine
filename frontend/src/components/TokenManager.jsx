@@ -8,7 +8,7 @@ import { getBlockExplorerUrl } from '../utils';
 import ErrorDisplay from './ErrorDisplay';
 import clsx from 'clsx';
 
-const API_URL = '/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export default function TokenManager({ token, onBack }) {
     const [activeTab, setActiveTab] = useState('holders');

@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 // Let's use viem for deployment via wagmi
 
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function DeploymentTabs() {
     const [mode, setMode] = useState('MANAGED'); // MANAGED or BYOW
