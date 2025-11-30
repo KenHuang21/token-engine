@@ -1,10 +1,18 @@
-import os
-import sys
+# Minimal test - does Vercel Python work at all?
+from http.server import BaseHTTPRequestHandler
+import json
 
-# Add the project root to sys.path so we can import backend
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from backend.main import app
-
-# Vercel expects a variable named 'app' or handler
-# We already imported 'app'
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        
+        response = {
+            "status": "ok",
+            "message": "Python function is working!",
+            "path": self.path
+        }
+        
+        self.wfile.write(json.dumps(response).encode())
+        return
