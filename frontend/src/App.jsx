@@ -3,6 +3,7 @@ import DashboardLayout from './components/DashboardLayout';
 import Dashboard from './components/Dashboard';
 import DeployWizard from './components/DeployWizard';
 import TokenManager from './components/TokenManager';
+import RewardsDistribution from './pages/RewardsDistribution';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -23,6 +24,8 @@ function App() {
         return <Dashboard onSelectToken={handleTokenSelect} onDeploy={() => setActiveTab('deploy')} />;
       case 'deploy':
         return <DeployWizard onComplete={() => setActiveTab('dashboard')} />;
+      case 'rewards':
+        return <RewardsDistribution />;
       default:
         return <Dashboard onSelectToken={handleTokenSelect} />;
     }

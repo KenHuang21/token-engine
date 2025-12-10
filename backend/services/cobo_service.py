@@ -236,6 +236,8 @@ class CoboClient:
             api_chain_id = chain_id
             if chain_id == "MATIC_POLYGON":
                 api_chain_id = "MATIC" # User confirmed chain_id is MATIC
+            elif chain_id == "ETH_SEPOLIA":
+                api_chain_id = "SETH"  # Cobo uses SETH for Sepolia testnet
             
             params = EstimateContractCallFeeParams(
                 request_id=str(uuid.uuid4()),
@@ -328,6 +330,8 @@ class CoboClient:
             api_chain_id = chain_id
             if chain_id == "MATIC_POLYGON":
                 api_chain_id = "MATIC"
+            elif chain_id == "ETH_SEPOLIA":
+                api_chain_id = "SETH"  # Cobo uses SETH for Sepolia testnet
 
             source = ContractCallSource(
                 actual_instance=CustodialWeb3ContractCallSource(
@@ -377,6 +381,8 @@ class CoboClient:
             api_chain_id = chain_id
             if chain_id == "MATIC_POLYGON":
                 api_chain_id = "MATIC"
+            elif chain_id == "ETH_SEPOLIA":
+                api_chain_id = "SETH"  # Cobo uses SETH for Sepolia testnet
 
             source = ContractCallSource(
                 actual_instance=CustodialWeb3ContractCallSource(

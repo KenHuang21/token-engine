@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from web3 import Web3
 from backend.services.cobo_service import cobo_client
+from backend.services import rewards_service
 from backend.config.settings import settings
 
 print(f"DEBUG: Cobo URL from settings: {settings.cobo_api_url}")
@@ -169,6 +170,33 @@ class RegisterMintRequest(BaseModel):
     to_address: str
     amount: float
     tx_hash: str
+
+# Rewards Distribution Models
+class SetRewardTokenRequest(BaseModel):
+    contract_address: str
+    reward_token_address: str
+    wallet_id: str
+    chain_id: str = "ETH_SEPOLIA"
+
+class DepositRewardsRequest(BaseModel):
+    contract_address: str
+    amount: int
+    wallet_id: str
+    chain_id: str = "ETH_SEPOLIA"
+    auto_approve: bool = True
+
+class ClaimRewardsRequest(BaseModel):
+    contract_address: str
+    wallet_id: str
+    chain_id: str = "ETH_SEPOLIA"
+
+class DelegateTokensRequest(BaseModel):
+    token_contract_address: str
+    delegatee_address: str
+    wallet_id: str
+    chain_id: str = "ETH_SEPOLIA"
+
+
 
 # --- 5. API Endpoints (ALIGNED WITH FRONTEND) ---
 
@@ -534,6 +562,133 @@ def get_artifacts():
         
     with open(abi_path, "r") as f:
         return json.load(f)
+
+# --- Rewards Distribution Endpoints ---
+
+@app.get("/rewards/info/{contract_address}")
+def get_rewards_info(contract_address: str, chain_id: str = "ETH_SEPOLIA"):
+    """Get rewards contract configuration and status."""
+    try:
+        info = rewards_service.get_rewards_info(contract_address, chain_id)
+        return {"status": "success", "data": info}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/rewards/claimable/{contract_address}/{investor_address}")
+def get_claimable_rewards(contract_address: str, investor_address: str, chain_id: str = "ETH_SEPOLIA"):
+    """Get claimable rewards for an investor."""
+    try:
+        result = rewards_service.get_claimable(contract_address, investor_address, chain_id)
+        return {"status": "success", "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/rewards/set-reward-token")
+def set_reward_token(req: SetRewardTokenRequest):
+    """Set the reward token address (Issuer only - requires MANAGER_ROLE)."""
+    try:
+        tx_id = rewards_service.set_reward_token(
+            req.contract_address,
+            req.reward_token_address,
+            req.wallet_id,
+            req.chain_id
+        )
+        return {"status": "success", "tx_id": tx_id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/rewards/take-snapshot")
+def take_snapshot(request: dict):
+    """Take a snapshot of token holders (Issuer only - requires MANAGER_ROLE)."""
+    try:
+        contract_address = request.get("contract_address")
+        wallet_id = request.get("wallet_id")
+        chain_id = request.get("chain_id", "ETH_SEPOLIA")
+        
+        tx_id = rewards_service.take_snapshot(contract_address, wallet_id, chain_id)
+        return {"status": "success", "tx_id": tx_id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/rewards/deposit")
+def deposit_rewards(req: DepositRewardsRequest):
+    """Deposit rewards to the contract (Issuer only - requires MANAGER_ROLE)."""
+    try:
+        result = rewards_service.deposit_rewards(
+            req.contract_address,
+            req.amount,
+            req.wallet_id,
+            req.chain_id,
+            req.auto_approve
+        )
+        return {"status": "success", "data": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/rewards/claim")
+def claim_rewards(req: ClaimRewardsRequest):
+    """Claim rewards for the investor."""
+    try:
+        tx_id = rewards_service.claim_rewards(
+            req.contract_address,
+            req.wallet_id,
+            req.chain_id
+        )
+        return {"status": "success", "tx_id": tx_id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/rewards/delegate")
+def delegate_tokens(req: DelegateTokensRequest):
+    """Delegate voting power for ERC20Votes tokens (required for snapshot eligibility)."""
+    try:
+        tx_id = rewards_service.delegate_tokens(
+            req.token_contract_address,
+            req.delegatee_address,
+            req.wallet_id,
+            req.chain_id
+        )
+        return {"status": "success", "tx_id": tx_id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/wallets/find-by-address/{address}")
+def get_wallet_id_by_address(address: str, chain_id: str = "ETH_SEPOLIA"):
+    """Find the Cobo wallet ID that controls a given address."""
+    try:
+        # Get all wallets using cobo_client
+        wallets = cobo_client.get_wallets(limit=50)
+        
+        # Map chain ID
+        from backend.services.rewards_service import map_chain_id
+        api_chain_id = map_chain_id(chain_id)
+        
+        # Search for wallet with this address
+        for wallet in wallets:
+            wallet_data = wallet.actual_instance
+            wallet_id = wallet_data.wallet_id
+            
+            try:
+                wallet_address = cobo_client.get_wallet_address(wallet_id, api_chain_id)
+                if wallet_address and wallet_address.lower() == address.lower():
+                    return {
+                        "status": "success",
+                        "wallet_id": wallet_id,
+                        "address": wallet_address,
+                        "wallet_name": wallet_data.name
+                    }
+            except:
+                continue
+        
+        # Not found - return default wallet ID
+        return {
+            "status": "not_found",
+            "wallet_id": "896d80b5-e653-4941-a906-ea55f28503e1",  # Default
+            "message": f"Address {address} not found in Cobo wallets. Using default wallet ID."
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 # --- 6. Local Development Server ---
 if __name__ == "__main__":

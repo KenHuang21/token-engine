@@ -1,6 +1,6 @@
 import React from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { LayoutDashboard, PlusCircle, FileText } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, FileText, Gift } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab }) {
     return (
@@ -34,6 +34,16 @@ export default function Sidebar({ activeTab, setActiveTab }) {
                 >
                     <PlusCircle className={`w-5 h-5 ${activeTab === 'deploy' ? 'text-indigo-600' : 'text-slate-400'}`} />
                     Deploy Token
+                </button>
+                <button
+                    onClick={() => setActiveTab('rewards')}
+                    className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'rewards'
+                        ? 'bg-indigo-50 text-indigo-700'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        }`}
+                >
+                    <Gift className={`w-5 h-5 ${activeTab === 'rewards' ? 'text-indigo-600' : 'text-slate-400'}`} />
+                    Rewards Distribution
                 </button>
             </nav>
 
