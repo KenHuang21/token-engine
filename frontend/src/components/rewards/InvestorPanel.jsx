@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, CheckCircle2, AlertCircle, TrendingUp, Wallet } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
-
-// Web3 import for browser wallet integration
-let ethers;
-if (typeof window !== 'undefined') {
-    import('https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.esm.min.js')
-        .then(module => { ethers = module; })
-        .catch(err => console.error('Failed to load ethers', err));
-}
 
 export default function InvestorPanel({ contractAddress, setContractAddress, walletId, setWalletId, chainId, setChainId }) {
     const [investorAddress, setInvestorAddress] = useState('');
@@ -152,70 +144,6 @@ export default function InvestorPanel({ contractAddress, setContractAddress, wal
         }
     };
 
-    const handleDelegateWithWallet = async () => {
-        if (!contractAddress) {
-            setError('Please enter token contract address');
-            return;
-        }
-
-        setLoadingDelegate(true);
-        setError(null);
-        setSuccess(null);
-
-        try {
-            // Check if ethers is loaded
-            if (!ethers) {
-                throw new Error('Ethers library not loaded yet. Please refresh and try again.');
-            }
-
-            // Check if MetaMask is installed
-            if (typeof window.ethereum === 'undefined') {
-                throw new Error('MetaMask is not installed. Please install MetaMask to continue.');
-            }
-
-            // Request account access
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            const signerAddress = await signer.getAddress();
-
-            console.log('Connected wallet:', signerAddress);
-
-            // Delegate to self by default, or to specified delegatee
-            const targetDelegatee = delegateeAddress || signerAddress;
-
-            // ERC20Votes delegate ABI
-            const delegateABI = [
-                "function delegate(address delegatee) external"
-            ];
-
-            const contract = new ethers.Contract(contractAddress, delegateABI, signer);
-
-            // Send delegation transaction
-            const tx = await contract.delegate(targetDelegatee);
-
-            setSuccess(`Delegation transaction sent! TX: ${tx.hash}. Waiting for confirmation...`);
-
-            // Wait for confirmation
-            const receipt = await tx.wait();
-
-            setSuccess(`✅ Delegation confirmed! TX: ${receipt.transactionHash}. Your tokens now have voting power. Take a new snapshot!`);
-
-        } catch (err) {
-            console.error('Delegation error:', err);
-            if (err.code === 4001) {
-                setError('Transaction rejected by user');
-            } else if (err.code === -32002) {
-                setError('MetaMask is already processing a request. Please check MetaMask.');
-            } else {
-                setError(err.message || 'Failed to delegate tokens');
-            }
-        } finally {
-            setLoadingDelegate(false);
-        }
-    };
-
     return (
         <div className="space-y-6">
             {/* Contract Configuration */}
@@ -291,33 +219,14 @@ export default function InvestorPanel({ contractAddress, setContractAddress, wal
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button
-                            onClick={handleDelegate}
-                            disabled={loadingDelegate}
-                            className="btn-primary bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-                        >
-                            {loadingDelegate ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                            Delegate via Cobo
-                        </button>
-
-                        <button
-                            onClick={handleDelegateWithWallet}
-                            disabled={loadingDelegate}
-                            className="btn-primary bg-orange-600 hover:bg-orange-700 focus:ring-orange-500"
-                        >
-                            {loadingDelegate ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Wallet className="w-4 h-4 mr-2" />}
-                            Delegate with MetaMask
-                        </button>
-                    </div>
-
-                    <div className="bg-blue-100 border border-blue-300 rounded-lg px-4 py-3 text-sm text-blue-800">
-                        <p className="font-semibold mb-1">Which option to use?</p>
-                        <ul className="list-disc list-inside space-y-1 text-xs">
-                            <li><strong>Cobo:</strong> Use if wallet is managed by Cobo (requires Wallet ID)</li>
-                            <li><strong>MetaMask:</strong> Use if you control the private key (connects your browser wallet)</li>
-                        </ul>
-                    </div>
+                    <button
+                        onClick={handleDelegate}
+                        disabled={loadingDelegate}
+                        className="btn-primary bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+                    >
+                        {loadingDelegate ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        Delegate Tokens
+                    </button>
 
                     <p className="text-xs text-slate-500">
                         💡 After delegation, take a new snapshot for your tokens to count in rewards
