@@ -144,6 +144,9 @@ def set_reward_token(contract_address: str, reward_token_address: str, wallet_id
         str: Transaction ID
     """
     try:
+        # Map chain ID for Cobo API
+        api_chain_id = map_chain_id(chain_id)
+        
         w3 = get_web3(chain_id)
         contract = w3.eth.contract(address=Web3.to_checksum_address(contract_address), abi=REWARDS_ABI)
         
@@ -158,7 +161,7 @@ def set_reward_token(contract_address: str, reward_token_address: str, wallet_id
         
         # Create transaction via Cobo
         tx_id = cobo_client.create_contract_call(
-            chain_id=chain_id,
+            chain_id=api_chain_id,
             wallet_id=wallet_id,
             to_address=contract_address,
             calldata=calldata,
@@ -184,19 +187,22 @@ def take_snapshot(contract_address: str, wallet_id: str, chain_id: str = "ETH_SE
         str: Transaction ID
     """
     try:
+        # Map chain ID for Cobo API
+        api_chain_id = map_chain_id(chain_id)
+        
         w3 = get_web3(chain_id)
         contract = w3.eth.contract(address=Web3.to_checksum_address(contract_address), abi=REWARDS_ABI)
         
         # Encode function call
         calldata = contract.functions.takeSnapshot().build_transaction({
             'from': '0x0000000000000000000000000000000000000000',
-            'gas': 100000,
+            'gas': 200000,
             'gasPrice': 0
         })['data']
         
         # Create transaction via Cobo
         tx_id = cobo_client.create_contract_call(
-            chain_id=chain_id,
+            chain_id=api_chain_id,
             wallet_id=wallet_id,
             to_address=contract_address,
             calldata=calldata,
